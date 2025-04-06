@@ -22,7 +22,7 @@ st.title("🅿️ Parking Availability & Price Predictor")
 st.markdown("Get predictions for parking availability and estimated pricing for the next few hours.")
 
 # --- User Inputs ---
-st.subheader("📅 Select Entry Time")
+st.subheader("🗕️ Select Entry Time")
 
 selected_date = st.date_input("Choose a date", value=datetime.date.today())
 selected_time = st.time_input("Choose a time (8:00 AM - 11:00 PM)", value=datetime.time(8, 0))
@@ -41,6 +41,16 @@ month = selected_datetime.month
 features = pd.DataFrame([[hour, day, month]], columns=["hour", "day_of_week", "month"])
 availability = model.predict(features)[0]
 availability_label = "🟢 OPEN" if availability == 1 else "🔴 FULL"
+
+# --- Predict Next Available Slot ---
+next_available_time = None
+if availability == 0:
+    for i in range(1, 13):
+        future_dt = selected_datetime + datetime.timedelta(hours=i)
+        ffeatures = pd.DataFrame([[future_dt.hour, future_dt.weekday(), future_dt.month]], columns=["hour", "day_of_week", "month"])
+        if model.predict(ffeatures)[0] == 1:
+            next_available_time = future_dt.strftime("%I:%M %p")
+            break
 
 # --- Price Logic ---
 def calculate_price(hour, day, availability):
@@ -61,6 +71,8 @@ st.markdown("### 📊 Prediction Results")
 col1, col2 = st.columns(2)
 with col1:
     st.metric("Availability", availability_label)
+    if next_available_time:
+        st.caption(f"⏰ Next available slot at: {next_available_time}")
 with col2:
     st.metric("Estimated Price", f"₹{predicted_price}")
 
@@ -68,7 +80,7 @@ with col2:
 st.markdown("### 📈 Pricing Forecast (Next 4 Hours)")
 
 future_predictions = []
-for i in range(5):  # current hour + 4 next
+for i in range(4):  # current hour + 3 next (restricted to 4 hours total)
     future_dt = selected_datetime + datetime.timedelta(hours=i)
     fhour = future_dt.hour
     fday = future_dt.weekday()
@@ -100,4 +112,4 @@ st.plotly_chart(fig, use_container_width=True)
 st.dataframe(future_df, use_container_width=True)
 
 st.markdown("---")
-st.caption("🚗 car parking price and availibility prediction using random forest classifier build for AIOT internship at DIGITOAD by Students of VVCE")
+st.caption("🚗 car parking price and availability prediction using random forest classifier built for AIOT internship at DIGITOAD by Students of VVCE")
