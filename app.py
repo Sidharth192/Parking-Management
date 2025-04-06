@@ -70,7 +70,7 @@ predicted_price = calculate_price(hour, day, availability)
 st.markdown("### 📊 Prediction Results")
 col1, col2 = st.columns(2)
 with col1:
-    st.metric("Availability", availability_label)
+    st.metric("Parking Availability", availability_label)
     if next_available_time:
         st.caption(f"⏰ Next available slot at: {next_available_time}")
 with col2:
@@ -102,7 +102,7 @@ fig = px.line(
     x="Time",
     y="Predicted Price (₹)",
     markers=True,
-    title="🕒 Price Forecast for Selected Slot",
+    title="🕒 Price Forecast for Selected time",
     line_shape="spline",
 )
 fig.update_traces(line=dict(color="blue", width=3), marker=dict(size=8))
